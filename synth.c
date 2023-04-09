@@ -28,6 +28,16 @@ void write_wav(float* buffer, int n){
     sf_close(file);
 }
 
+void synth(int n, int f, float* freqs, float* buffer){
+    float phaseIncrement = 2.0f * M_PI / (SAMPLE_RATE / freqs[f]);
+    float phase = 0.0f;
+
+    // Generate the sine wave
+    for (int i = n*f; i < n*(f+1); i++) {
+        buffer[i] = AMP * sinf(phase);
+        phase += phaseIncrement;
+    }
+}
 
 int main() {
     int n = ceil(SAMPLE_RATE * DURATION);
@@ -36,14 +46,7 @@ int main() {
     int n_notes = sizeof(freqs) / sizeof(float);
     float buffer[n*n_notes];
     for (int f=0; f < n_notes; f++){
-        float phaseIncrement = 2.0f * M_PI / (SAMPLE_RATE / freqs[f]);
-        float phase = 0.0f;
-
-        // Generate the sine wave
-        for (int i = n*f; i < n*(f+1); i++) {
-            buffer[i] = AMP * sinf(phase);
-            phase += phaseIncrement;
-        }
+        synth(n, f, freqs, buffer);
     }
 
     write_wav(buffer, n*n_notes);
