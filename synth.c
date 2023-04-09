@@ -4,8 +4,7 @@
 #include <sndfile.h>
 
 #define SAMPLE_RATE 44100
-#define FREQ 440.0f
-#define AMP 0.5f
+#define AMP 0.3f
 #define DURATION 1.0f
 
 void write_wav(float* buffer, int n){
@@ -32,17 +31,22 @@ void write_wav(float* buffer, int n){
 
 int main() {
     int n = ceil(SAMPLE_RATE * DURATION);
-    float phaseIncrement = 2.0f * M_PI / (SAMPLE_RATE / FREQ);
-    float phase = 0.0f;
-    float buffer[n];
 
-    // Generate the sine wave
-    for (int i = 0; i < n; i++) {
-        buffer[i] = AMP * sinf(phase);
-        phase += phaseIncrement;
+    float freqs[7] = {440.0f, 493.88f, 523.25f, 587.33f, 659.26f, 698.46f, 783.99f};
+    int n_notes = sizeof(freqs) / sizeof(float);
+    float buffer[n*n_notes];
+    for (int f=0; f < n_notes; f++){
+        float phaseIncrement = 2.0f * M_PI / (SAMPLE_RATE / freqs[f]);
+        float phase = 0.0f;
+
+        // Generate the sine wave
+        for (int i = n*f; i < n*(f+1); i++) {
+            buffer[i] = AMP * sinf(phase);
+            phase += phaseIncrement;
+        }
     }
 
-    write_wav(buffer, n);
+    write_wav(buffer, n*n_notes);
 
     return 0;
 }
