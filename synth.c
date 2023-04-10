@@ -3,6 +3,8 @@
 #include <math.h>
 #include <sndfile.h>
 
+#define MAXBUFLEN 1000
+
 #define SAMPLE_RATE 44100
 #define AMP 0.3f
 #define DURATION 1.0f
@@ -28,25 +30,68 @@ void write_wav(float* buffer, int n){
     sf_close(file);
 }
 
-void synth(int n, int f, float* freqs, float* buffer){
-    float phaseIncrement = 2.0f * M_PI / (SAMPLE_RATE / freqs[f]);
+void sine(int n, int id, float* freqs, float* buffer){
+    float phaseIncrement = 2.0f * M_PI / (SAMPLE_RATE / freqs[id]);
     float phase = 0.0f;
 
     // Generate the sine wave
-    for (int i = n*f; i < n*(f+1); i++) {
+    for (int i = n*id; i < n*(id+1); i++) {
         buffer[i] = AMP * sinf(phase);
         phase += phaseIncrement;
     }
 }
 
+int read_notes(char* fnotes){
+    FILE *fp = fopen("notes.n", "r");
+    char buffer[MAXBUFLEN + 1];
+
+    if (fp == NULL){
+        printf("File not found");
+        exit(1);
+    }
+
+    int n_notes = 0;
+    while (fscanf(fp, "%s", buffer) != EOF) {
+        for (int j = 0; buffer[j] != '\0'; j++) {
+            fnotes[n_notes++] = buffer[j];
+        }
+    }
+
+    fclose(fp);
+
+    return n_notes;
+}
+
 int main() {
     int n = ceil(SAMPLE_RATE * DURATION);
 
+    char notes[7] = {'A', 'B', 'C', 'D', 'E', 'F', 'G'};
     float freqs[7] = {440.0f, 493.88f, 523.25f, 587.33f, 659.26f, 698.46f, 783.99f};
-    int n_notes = sizeof(freqs) / sizeof(float);
+
+    //char fnotes[MAXBUFLEN + 1];
+    //int n_notes = read_notes(fnotes);
+    char fnotes[4] = "ACAB";
+    int n_notes = 4;
+    printf("%d notes\n", n_notes);
     float buffer[n*n_notes];
     for (int f=0; f < n_notes; f++){
-        synth(n, f, freqs, buffer);
+        char fnote = fnotes[f];
+        int id = -1;
+
+        for (int i=0; i < sizeof(notes) / sizeof(char); i++){
+            if (notes[i] == fnote){
+                id = i;
+                break;
+            }
+        }
+
+        if (id == -1){
+            printf("Note %c not found", fnote);
+            exit(1);
+        }
+
+        printf("(%d, %c, %f)\n", id, fnote, freqs[id]);
+        sine(n, id, freqs, buffer);
     }
 
     write_wav(buffer, n*n_notes);
