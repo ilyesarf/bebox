@@ -30,12 +30,12 @@ void write_wav(float* buffer, int n){
     sf_close(file);
 }
 
-void sine(int n, int id, float* freqs, float* buffer){
-    float phaseIncrement = 2.0f * M_PI / (SAMPLE_RATE / freqs[id]);
+void sine(int n, int f, float freq, float* buffer){
+    float phaseIncrement = 2.0f * M_PI / (SAMPLE_RATE / freq);
     float phase = 0.0f;
 
     // Generate the sine wave
-    for (int i = n*id; i < n*(id+1); i++) {
+    for (int i = n*f; i < n*(f+1); i++) {
         buffer[i] = AMP * sinf(phase);
         phase += phaseIncrement;
     }
@@ -68,11 +68,9 @@ int main() {
     char notes[7] = {'A', 'B', 'C', 'D', 'E', 'F', 'G'};
     float freqs[7] = {440.0f, 493.88f, 523.25f, 587.33f, 659.26f, 698.46f, 783.99f};
 
-    //char fnotes[MAXBUFLEN + 1];
-    //int n_notes = read_notes(fnotes);
-    char fnotes[4] = "ACAB";
-    int n_notes = 4;
-    printf("%d notes\n", n_notes);
+    char fnotes[MAXBUFLEN + 1];
+    int n_notes = read_notes(fnotes);
+
     float buffer[n*n_notes];
     for (int f=0; f < n_notes; f++){
         char fnote = fnotes[f];
@@ -90,8 +88,7 @@ int main() {
             exit(1);
         }
 
-        printf("(%d, %c, %f)\n", id, fnote, freqs[id]);
-        sine(n, id, freqs, buffer);
+        sine(n, f, freqs[id], buffer);
     }
 
     write_wav(buffer, n*n_notes);
