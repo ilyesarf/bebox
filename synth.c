@@ -9,6 +9,16 @@
 #define AMP 0.3f
 #define DURATION 1.0f
 
+struct Note{
+    char name;
+    float freq;
+
+    float attack;
+    float decay;
+    float sustain;
+    float release;
+};
+
 void write_wav(float* buffer, int n){
     SNDFILE *file;
     SF_INFO info;
@@ -28,17 +38,6 @@ void write_wav(float* buffer, int n){
 
     // Close the output file
     sf_close(file);
-}
-
-void sine(int n, int f, float freq, float* buffer){
-    float phaseIncrement = 2.0f * M_PI / (SAMPLE_RATE / freq);
-    float phase = 0.0f;
-
-    // Generate the sine wave
-    for (int i = n*f; i < n*(f+1); i++) {
-        buffer[i] = AMP * sinf(phase);
-        phase += phaseIncrement;
-    }
 }
 
 int read_notes(char* fnotes){
@@ -62,11 +61,45 @@ int read_notes(char* fnotes){
     return n_notes;
 }
 
+float lerp(float a, float b, float t) {
+    return a + (b - a) * t;
+}
+
+float adsr(float t, float attack, float decay, float sustain, float release) {
+    if (t < attack) {
+        return lerp(0.0f, 1.0f, t / attack);
+    } else if (t < attack + decay) {
+        return lerp(1.0f, sustain, (t - attack) / decay);
+    } else if (t < attack + decay + sustain) {
+        return sustain;
+    } else {
+        return lerp(sustain, 0.0f, (t - attack - decay - sustain) / release);
+    }
+}
+
+void sine(int n, int f, struct Note* note, float* buffer){
+    float period = 1.0f / note->freq;
+    float phaseIncrement = 2.0f * M_PI / (SAMPLE_RATE / note->freq);
+    float phase = 0.0f;
+
+    // Generate the sine wave
+    for (int i = n*f; i < n*(f+1); i++) {
+        buffer[i] = sinf(phase) * adsr(period, note->attack, note->decay, note->sustain, note->release);
+        phase += phaseIncrement;
+    }
+}
+
+
 int main() {
     int n = ceil(SAMPLE_RATE * DURATION);
 
-    char notes[7] = {'A', 'B', 'C', 'D', 'E', 'F', 'G'};
-    float freqs[7] = {440.0f, 493.88f, 523.25f, 587.33f, 659.26f, 698.46f, 783.99f};
+    struct Note notes[7] = {{'A', 440.0f, 0.01, 0.1, 0.7, 0.1}, 
+    {'B', 493.88f, 0.01, 0.1, 0.7, 0.1}, 
+    {'C', 523.25f, 0.01, 0.1, 0.7, 0.1}, 
+    {'D', 587.33f, 0.01, 0.1, 0.7, 0.1}, 
+    {'E', 659.26f, 0.01, 0.1, 0.7, 0.1}, 
+    {'F', 698.46f, 0.01, 0.1, 0.7, 0.1}, 
+    {'G', 783.99f, 0.01, 0.1, 0.7, 0.1}};
 
     char fnotes[MAXBUFLEN + 1];
     int n_notes = read_notes(fnotes);
@@ -76,8 +109,8 @@ int main() {
         char fnote = fnotes[f];
         int id = -1;
 
-        for (int i=0; i < sizeof(notes) / sizeof(char); i++){
-            if (notes[i] == fnote){
+        for (int i=0; i < sizeof(notes) / sizeof(struct Note); i++){
+            if (notes[i].name == fnote){
                 id = i;
                 break;
             }
@@ -88,7 +121,7 @@ int main() {
             exit(1);
         }
 
-        sine(n, f, freqs[id], buffer);
+        sine(n, f, &notes[id], buffer);
     }
 
     write_wav(buffer, n*n_notes);
