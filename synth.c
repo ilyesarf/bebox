@@ -2,22 +2,11 @@
 #include <stdlib.h>
 #include <math.h>
 #include <sndfile.h>
-
+#include "synth.h"
 #define MAXBUFLEN 1000
 
 #define SAMPLE_RATE 44100
-#define AMP 0.3f
 #define DURATION 1.0f
-
-struct Note{
-    char name;
-    float freq;
-
-    float attack;
-    float decay;
-    float sustain;
-    float release;
-};
 
 void write_wav(float* buffer, int n){
     SNDFILE *file;
@@ -42,17 +31,19 @@ void write_wav(float* buffer, int n){
 
 int read_notes(char* fnotes){
     FILE *fp = fopen("notes.n", "r");
-    char buffer[MAXBUFLEN + 1];
+    char line[MAXBUFLEN + 1];
 
     if (fp == NULL){
         printf("File not found");
         exit(1);
     }
 
-    int n_notes = 0;
-    while (fscanf(fp, "%s", buffer) != EOF) {
-        for (int j = 0; buffer[j] != '\0'; j++) {
-            fnotes[n_notes++] = buffer[j];
+    int n_notes;
+    char space[] = " ";
+    while (fgets(line, sizeof(line), fp)) {
+        char* tokens = split(line, space, &n_notes);
+        for (int i=0; i < n_notes; i++){
+            strcpy(&fnotes[i], &tokens[i]);
         }
     }
 
@@ -117,7 +108,7 @@ int main() {
         }
 
         if (id == -1){
-            printf("Note %c not found", fnote);
+            printf("Note %c not found\n", fnote);
             exit(1);
         }
 
