@@ -12,9 +12,9 @@ struct Note{
     float release;
 };
 
-char *split(char *str, char *delimiter, int *num_tokens) {
+char **split(char *str, char *delimiter, int *num_tokens) {
     // Allocate memory for the array of strings
-    char *tokens = (char *)malloc(sizeof(char *));
+    char **tokens = (char **)malloc(sizeof(char *));
     if (tokens == NULL) {
         fprintf(stderr, "Error: Unable to allocate memory\n");
         exit(EXIT_FAILURE);
@@ -24,9 +24,9 @@ char *split(char *str, char *delimiter, int *num_tokens) {
     char* token = strtok(str, delimiter);
     int count = 0;
     while (token != NULL) {
-        tokens[count] = *token;
+        tokens[count] = token;
         count++;
-        tokens = (char *)realloc(tokens, (count + 1) * sizeof(char *));
+        tokens = (char **)realloc(tokens, (count + 1) * sizeof(char *));
         if (tokens == NULL) {
             fprintf(stderr, "Error: Unable to allocate memory\n");
             exit(EXIT_FAILURE);

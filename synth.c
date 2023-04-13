@@ -29,7 +29,7 @@ void write_wav(float* buffer, int n){
     sf_close(file);
 }
 
-int read_notes(char* fnotes){
+int read_notes(char** fnotes){
     FILE *fp = fopen("notes.n", "r");
     char line[MAXBUFLEN + 1];
 
@@ -41,7 +41,7 @@ int read_notes(char* fnotes){
     int n_notes;
     char space[] = " ";
     while (fgets(line, sizeof(line), fp)) {
-        char* tokens = split(line, space, &n_notes);
+        char** tokens = split(line, space, &n_notes);
         for (int i=0; i < n_notes; i++){
             strcpy(&fnotes[i], &tokens[i]);
         }
@@ -92,23 +92,23 @@ int main() {
     {'F', 698.46f, 0.01, 0.1, 0.7, 0.1}, 
     {'G', 783.99f, 0.01, 0.1, 0.7, 0.1}};
 
-    char fnotes[MAXBUFLEN + 1];
+    char* fnotes[MAXBUFLEN + 1];
     int n_notes = read_notes(fnotes);
 
     float buffer[n*n_notes];
     for (int f=0; f < n_notes; f++){
-        char fnote = fnotes[f];
+        char* fnote = fnotes[f];
         int id = -1;
 
         for (int i=0; i < sizeof(notes) / sizeof(struct Note); i++){
-            if (notes[i].name == fnote){
+            if (notes[i].name == fnote[0]){
                 id = i;
                 break;
             }
         }
 
         if (id == -1){
-            printf("Note %c not found\n", fnote);
+            printf("Note %c not found\n", *fnote);
             exit(1);
         }
 
