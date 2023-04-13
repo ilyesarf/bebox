@@ -68,9 +68,11 @@ float adsr(float t, float attack, float decay, float sustain, float release) {
     }
 }
 
-void sine(int n, int f, struct Note* note, float* buffer){
-    float period = 1.0f / note->freq;
-    float phaseIncrement = 2.0f * M_PI / (SAMPLE_RATE / note->freq);
+void sine(int n, int f, struct Note* note, int pitch, float* buffer){
+    float freq = (note->freq)/pow(2, (4-pitch));
+    //printf("%c : %d : %f\n", note->name, pitch, freq);
+    float period = 1.0f / freq;
+    float phaseIncrement = 2.0f * M_PI / (SAMPLE_RATE / freq);
     float phase = 0.0f;
 
     // Generate the sine wave
@@ -98,6 +100,14 @@ int main() {
     float buffer[n*n_notes];
     for (int f=0; f < n_notes; f++){
         char* fnote = fnotes[f];
+
+        int pitch;
+        if (fnote[1] != '\0'){
+            pitch = fnote[1] - '0';
+        } else{
+            pitch = 4;
+        }
+
         int id = -1;
 
         for (int i=0; i < sizeof(notes) / sizeof(struct Note); i++){
@@ -112,7 +122,7 @@ int main() {
             exit(1);
         }
 
-        sine(n, f, &notes[id], buffer);
+        sine(n, f, &notes[id], pitch, buffer);
     }
 
     write_wav(buffer, n*n_notes);
