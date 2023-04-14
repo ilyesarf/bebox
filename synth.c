@@ -30,7 +30,21 @@ int read_notes(char** fnotes){
     return n_notes;
 }
 
-int main() {
+int main(int argc, char *argv[]) {
+    void (*synth)(int, int, struct Note *, int, float *) = NULL;
+    if (argc == 2){
+        if (strcmp(argv[1], "sine") == 0){
+            synth = sine;
+        } else if (strcmp(argv[1], "tooth") == 0 || strcmp(argv[1], "sawtooth") == 0){
+            synth = sawtooth;
+        } else{
+            printf("Undefined waveform");
+            exit(1);
+        }
+    } else{
+        synth = sine;
+    }
+
     int n = ceil(SAMPLE_RATE * DURATION);
 
     struct Note notes[7] = {{'A', 440.0f, 0.01, 0.1, 0.7, 0.1}, 
@@ -69,7 +83,7 @@ int main() {
             exit(1);
         }
 
-        sine(n, f, &notes[id], pitch, buffer);
+        synth(n, f, &notes[id], pitch, buffer);
     }
 
     write_wav(buffer, n*n_notes);

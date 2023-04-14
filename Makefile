@@ -1,5 +1,5 @@
 CC = clang
-CFLAGS = -Wall -Wextra
+CFLAGS = -Wall -g
 LDFLAGS = -lm -lsndfile
 
 SOURCES = synth.c waveforms.c
