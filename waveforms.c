@@ -46,3 +46,30 @@ void sawtooth(int n, int f, struct Note* note, int pitch, float* buffer) {
         phase += phaseIncrement;
     }
 }
+
+void square(int n, int f, struct Note* note, int pitch, float* buffer){
+    float freq = (note->freq)/pow(2, (4-pitch));
+    float period = 1.0f / freq;
+    float phaseIncrement = 2.0f * M_PI / (SAMPLE_RATE / freq);
+    float phase = 0.0f;
+    float dutyCycle = 0.5f; // 50% duty cycle by default
+    
+    // Check if duty cycle is specified in note data
+    if (note->dutyCycle > 0 && note->dutyCycle < 1) {
+        dutyCycle = note->dutyCycle;
+    }
+
+    // Generate the square wave
+    for (int i = n*f; i < n*(f+1); i++) {
+        float value = sinf(phase);
+        if (value > dutyCycle) {
+            buffer[i] = 1.0f * adsr(period, note->attack, note->decay, note->sustain, note->release);
+        } else {
+            buffer[i] = -1.0f * adsr(period, note->attack, note->decay, note->sustain, note->release);
+        }
+        phase += phaseIncrement;
+        if (phase >= 2.0f * M_PI) {
+            phase -= 2.0f * M_PI;
+        }
+    }
+}
