@@ -5,15 +5,6 @@
 
 #define SAMPLE_RATE 44100
 
-struct Note{
-    char name;
-    float freq;
-
-    float attack;
-    float decay;
-    float sustain;
-    float release;
-};
 
 char **split(char *str, char *delimiter, int *num_tokens) {
     // Allocate memory for the array of strings
@@ -63,3 +54,4 @@ void write_wav(float* buffer, int n){
     // Close the output file
     sf_close(file);
 }
+
