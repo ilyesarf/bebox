@@ -25,4 +25,5 @@ void sawtooth(int n, int f, struct Note* note, int pitch, float* buffer);
 
 void square(int n, int f, struct Note* note, int pitch, float* buffer);
 
+void triangle(int n, int f, struct Note* note, int pitch, float* buffer);
 #endif

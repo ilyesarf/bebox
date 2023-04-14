@@ -73,3 +73,32 @@ void square(int n, int f, struct Note* note, int pitch, float* buffer){
         }
     }
 }
+
+void triangle(int n, int f, struct Note* note, int pitch, float* buffer) {
+    float freq = (note->freq) / pow(2, (4-pitch));
+    float period = 1.0f / freq;
+    float phaseIncrement = 2 * M_PI * freq / SAMPLE_RATE;
+    float phase = -1.0f;
+    float amp = 0.5f;
+
+    for (int i = n*f; i < n*(f+1); i++) {
+        float sample;
+        if (phase <= M_PI) {
+            sample = 2 * amp * (2 * phase / M_PI - 1);
+        } else {
+            sample = 2 * amp * (3 - 2 * phase / M_PI) - 2;
+        }
+
+        sample *= adsr(period, note->attack, note->decay, note->sustain, note->release);
+        buffer[i] = sample;
+
+        phase += phaseIncrement;
+
+        if (phase >= 2 * M_PI) {
+            phase -= 2 * M_PI;
+        }
+    }
+}
+
+
+

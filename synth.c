@@ -39,6 +39,8 @@ int main(int argc, char *argv[]) {
             synth = sawtooth;
         } else if (strcmp(argv[1], "sqr") == 0 || strcmp(argv[1], "square") == 0){
             synth = square;
+        } else if (strcmp(argv[1], "tri") == 0 || strcmp(argv[1], "triangle") == 0){
+            synth = triangle;
         }else{
             printf("Undefined waveform");
             exit(1);
