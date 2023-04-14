@@ -1,33 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <sndfile.h>
 #include "synth.h"
+
 #define MAXBUFLEN 1000
-
-#define SAMPLE_RATE 44100
 #define DURATION 1.0f
-
-void write_wav(float* buffer, int n){
-    SNDFILE *file;
-    SF_INFO info;
-
-    // Open the output file for writing
-    info.samplerate = SAMPLE_RATE;
-    info.channels = 1;
-    info.format = SF_FORMAT_WAV | SF_FORMAT_FLOAT;
-    file = sf_open("sine.wav", SFM_WRITE, &info);
-    if (!file) {
-        printf("Error opening output file\n");
-        exit(1);
-    }
-
-    // Write the samples to the output file
-    sf_write_float(file, buffer, n);
-
-    // Close the output file
-    sf_close(file);
-}
 
 int read_notes(char** fnotes){
     FILE *fp = fopen("notes.n", "r");
