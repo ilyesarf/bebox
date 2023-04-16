@@ -30,29 +30,7 @@ int read_notes(char** fnotes){
     return n_notes;
 }
 
-void mix(void (*waveforms[])(int, int, struct Note *, int, float *), int n_waveforms, int n, int f, struct Note* note, int pitch, float* buffer){
-    //zero buffer
-    for (int i=n*f; i < n*(f+1); i++){
-        buffer[i] = 0;
-    }
-
-
-    if (note->name != '0'){
-        for (int i=0; i < n_waveforms; i++){
-            void (*waveform)(int, int, struct Note*, int, float*) = waveforms[i];
-            waveform(n, f, note, pitch, buffer);
-        }
-    }
-}
-
-int main(int argc, char *argv[]) {
-    void (**waveforms)(int, int, struct Note *, int, float *) = NULL;
-    waveforms = (void (**)(int, int, struct Note*, int, float*)) malloc((argc - 1) * sizeof(void (*)()));
-    if (waveforms == NULL) {
-        printf("Failed to allocate memory\n");
-        exit(1);
-    }
-
+int get_waveforms(void (*waveforms[])(int, int, struct Note *, int, float *), int argc, char *argv[]){
     int n_waveforms = 0;
     
     for (int i = 1; i < argc; i++){
@@ -76,17 +54,46 @@ int main(int argc, char *argv[]) {
     if (n_waveforms == 0){
         waveforms[0] = sine;
         n_waveforms = 1;
-    } 
+    }
+
+    return n_waveforms;
+}
+
+void mix(void (*waveforms[])(int, int, struct Note *, int, float *), int n_waveforms, int n, int f, struct Note* note, int pitch, float* buffer){
+    //zero buffer
+    for (int i=n*f; i < n*(f+1); i++){
+        buffer[i] = 0;
+    }
+
+
+    if (note->name != '0'){
+        for (int i=0; i < n_waveforms; i++){
+            void (*waveform)(int, int, struct Note*, int, float*) = waveforms[i];
+            waveform(n, f, note, pitch, buffer);
+        }
+    }
+}
+
+int main(int argc, char *argv[]) {
+    void (**waveforms)(int, int, struct Note *, int, float *) = NULL;
+    waveforms = (void (**)(int, int, struct Note*, int, float*)) malloc((argc - 1) * sizeof(void (*)()));
+    if (waveforms == NULL) {
+        printf("Failed to allocate memory\n");
+        exit(1);
+    }
+
+    int n_waveforms = get_waveforms(waveforms, argc, argv);
 
     int n = ceil(SAMPLE_RATE * DURATION);
 
-    struct Note notes[8] = {{'A', 440.0f, 0.01, 0.1, 0.7, 0.1}, 
-    {'B', 493.88f, 0.01, 0.1, 0.7, 0.1}, 
-    {'C', 523.25f, 0.01, 0.1, 0.7, 0.1}, 
-    {'D', 587.33f, 0.01, 0.1, 0.7, 0.1}, 
-    {'E', 659.26f, 0.01, 0.1, 0.7, 0.1}, 
-    {'F', 698.46f, 0.01, 0.1, 0.7, 0.1}, 
-    {'G', 783.99f, 0.01, 0.1, 0.7, 0.1},
+    struct Note notes[8] = {
+    {'A', 440.0f, 0.02, 0.2, 0.6, 0.3}, 
+    {'B', 493.88f, 0.02, 0.2, 0.6, 0.3}, 
+    {'C', 523.25f, 0.02, 0.2, 0.6, 0.3}, 
+    {'D', 587.33f, 0.02, 0.2, 0.6, 0.3}, 
+    {'E', 659.26f, 0.02, 0.2, 0.6, 0.3}, 
+    {'F', 698.46f, 0.02, 0.2, 0.6, 0.3}, 
+    {'G', 783.99f, 0.02, 0.2, 0.6, 0.3},
     {'0'}};
 
     char* fnotes[MAXBUFLEN + 1];
