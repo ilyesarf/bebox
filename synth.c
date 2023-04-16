@@ -30,6 +30,18 @@ int read_notes(char** fnotes){
     return n_notes;
 }
 
+void mix(void (*waveforms[])(int, int, struct Note *, int, float *), int n_waveforms, int n, int f, struct Note* note, int pitch, float* buffer){
+    //zero buffer
+    for (int i=n*f; i < n*(f+1); i++){
+        buffer[i] = 0;
+    }
+
+    for (int i=0; i < n_waveforms; i++){
+        void (*waveform)(int, int, struct Note*, int, float*) = waveforms[i];
+        waveform(n, f, note, pitch, buffer);
+    }
+}
+
 int main(int argc, char *argv[]) {
     void (**waveforms)(int, int, struct Note *, int, float *) = NULL;
     waveforms = (void (**)(int, int, struct Note*, int, float*)) malloc((argc - 1) * sizeof(void (*)()));
@@ -101,7 +113,7 @@ int main(int argc, char *argv[]) {
             exit(1);
         }
 
-        //synth(n, f, &notes[id], pitch, buffer);
+        mix(waveforms, n_waveforms, n, f, &notes[id], pitch, buffer);
     }
 
     write_wav(buffer, n*n_notes);

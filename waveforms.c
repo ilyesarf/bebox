@@ -27,7 +27,7 @@ void sine(int n, int f, struct Note* note, int pitch, float* buffer){
     // Generate the sine wave
     for (int i = n*f; i < n*(f+1); i++) {
         amp = sinf(phase);
-        buffer[i] = amp * adsr(period, note->attack, note->decay, note->sustain, note->release);
+        buffer[i] += amp * adsr(period, note->attack, note->decay, note->sustain, note->release);
         phase += phaseIncrement;
     }
 }
@@ -42,7 +42,7 @@ void sawtooth(int n, int f, struct Note* note, int pitch, float* buffer) {
     // generate sawtooth waveform
     for (int i = n*f; i < n*(f+1); i++) {
         amp = fmodf(phase, 1.0f);
-        buffer[i] = amp * adsr(period, note->attack, note->decay, note->sustain, note->release);
+        buffer[i] += amp * adsr(period, note->attack, note->decay, note->sustain, note->release);
         phase += phaseIncrement;
     }
 }
@@ -63,9 +63,9 @@ void square(int n, int f, struct Note* note, int pitch, float* buffer){
     for (int i = n*f; i < n*(f+1); i++) {
         float value = sinf(phase);
         if (value > dutyCycle) {
-            buffer[i] = 1.0f * adsr(period, note->attack, note->decay, note->sustain, note->release);
+            buffer[i] += 1.0f * adsr(period, note->attack, note->decay, note->sustain, note->release);
         } else {
-            buffer[i] = -1.0f * adsr(period, note->attack, note->decay, note->sustain, note->release);
+            buffer[i] += -1.0f * adsr(period, note->attack, note->decay, note->sustain, note->release);
         }
         phase += phaseIncrement;
         if (phase >= 2.0f * M_PI) {
@@ -90,7 +90,7 @@ void triangle(int n, int f, struct Note* note, int pitch, float* buffer) {
         }
 
         sample *= adsr(period, note->attack, note->decay, note->sustain, note->release);
-        buffer[i] = sample;
+        buffer[i] += sample;
 
         phase += phaseIncrement;
 
