@@ -36,9 +36,12 @@ void mix(void (*waveforms[])(int, int, struct Note *, int, float *), int n_wavef
         buffer[i] = 0;
     }
 
-    for (int i=0; i < n_waveforms; i++){
-        void (*waveform)(int, int, struct Note*, int, float*) = waveforms[i];
-        waveform(n, f, note, pitch, buffer);
+
+    if (note->name != '0'){
+        for (int i=0; i < n_waveforms; i++){
+            void (*waveform)(int, int, struct Note*, int, float*) = waveforms[i];
+            waveform(n, f, note, pitch, buffer);
+        }
     }
 }
 
@@ -77,13 +80,14 @@ int main(int argc, char *argv[]) {
 
     int n = ceil(SAMPLE_RATE * DURATION);
 
-    struct Note notes[7] = {{'A', 440.0f, 0.01, 0.1, 0.7, 0.1}, 
+    struct Note notes[8] = {{'A', 440.0f, 0.01, 0.1, 0.7, 0.1}, 
     {'B', 493.88f, 0.01, 0.1, 0.7, 0.1}, 
     {'C', 523.25f, 0.01, 0.1, 0.7, 0.1}, 
     {'D', 587.33f, 0.01, 0.1, 0.7, 0.1}, 
     {'E', 659.26f, 0.01, 0.1, 0.7, 0.1}, 
     {'F', 698.46f, 0.01, 0.1, 0.7, 0.1}, 
-    {'G', 783.99f, 0.01, 0.1, 0.7, 0.1}};
+    {'G', 783.99f, 0.01, 0.1, 0.7, 0.1},
+    {'0'}};
 
     char* fnotes[MAXBUFLEN + 1];
     int n_notes = read_notes(fnotes);
