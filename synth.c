@@ -31,23 +31,37 @@ int read_notes(char** fnotes){
 }
 
 int main(int argc, char *argv[]) {
-    void (*synth)(int, int, struct Note *, int, float *) = NULL;
-    if (argc == 2){
-        if (strcmp(argv[1], "sine") == 0){
-            synth = sine;
-        } else if (strcmp(argv[1], "tooth") == 0 || strcmp(argv[1], "sawtooth") == 0){
-            synth = sawtooth;
-        } else if (strcmp(argv[1], "sqr") == 0 || strcmp(argv[1], "square") == 0){
-            synth = square;
-        } else if (strcmp(argv[1], "tri") == 0 || strcmp(argv[1], "triangle") == 0){
-            synth = triangle;
+    void (**waveforms)(int, int, struct Note *, int, float *) = NULL;
+    waveforms = (void (**)(int, int, struct Note*, int, float*)) malloc((argc - 1) * sizeof(void (*)()));
+    if (waveforms == NULL) {
+        printf("Failed to allocate memory\n");
+        exit(1);
+    }
+
+    int n_waveforms = 0;
+    
+    for (int i = 1; i < argc; i++){
+        char* wavefrm = argv[i];
+
+        if (strcmp(wavefrm, "sine") == 0){
+            waveforms[n_waveforms] = sine;
+        } else if (strcmp(wavefrm, "tooth") == 0 || strcmp(wavefrm, "sawtooth") == 0){
+            waveforms[n_waveforms] = sawtooth;
+        } else if (strcmp(wavefrm, "sqr") == 0 || strcmp(wavefrm, "square") == 0){
+            waveforms[n_waveforms] = square;
+        } else if (strcmp(wavefrm, "tri") == 0 || strcmp(wavefrm, "triangle") == 0){
+            waveforms[n_waveforms] = triangle;
         }else{
-            printf("Undefined waveform");
+            printf("Undefined waveform: %s\n", wavefrm);
             exit(1);
         }
-    } else{
-        synth = sine;
+        n_waveforms++;
     }
+    
+    if (n_waveforms == 0){
+        waveforms[0] = sine;
+        n_waveforms = 1;
+    } 
 
     int n = ceil(SAMPLE_RATE * DURATION);
 
@@ -87,7 +101,7 @@ int main(int argc, char *argv[]) {
             exit(1);
         }
 
-        synth(n, f, &notes[id], pitch, buffer);
+        //synth(n, f, &notes[id], pitch, buffer);
     }
 
     write_wav(buffer, n*n_notes);
