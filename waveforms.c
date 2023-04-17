@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <math.h>
 #include "waveforms.h"
 
@@ -17,8 +18,7 @@ float adsr(float t, float attack, float decay, float sustain, float release) {
     }
 }
 
-void sine(int n, int f, struct Note* note, int pitch, float* buffer){
-    float freq = (note->freq)/pow(2, (4-pitch));
+void sine(int n, int f, struct Note* note, float freq, float* buffer){
     float period = 1.0f / freq;
     float phaseIncrement = 2.0f * M_PI / (SAMPLE_RATE / freq);
     float phase = 0.0f;
@@ -32,8 +32,7 @@ void sine(int n, int f, struct Note* note, int pitch, float* buffer){
     }
 }
 
-void sawtooth(int n, int f, struct Note* note, int pitch, float* buffer) {
-    float freq = (note->freq) / pow(2, (4 - pitch));
+void sawtooth(int n, int f, struct Note* note, float freq, float* buffer){
     float period = 1.0f / freq;
     float phaseIncrement = 2.0f / (SAMPLE_RATE / freq);
     float phase = 0.0f;
@@ -47,8 +46,7 @@ void sawtooth(int n, int f, struct Note* note, int pitch, float* buffer) {
     }
 }
 
-void square(int n, int f, struct Note* note, int pitch, float* buffer){
-    float freq = (note->freq)/pow(2, (4-pitch));
+void square(int n, int f, struct Note* note, float freq, float* buffer){
     float period = 1.0f / freq;
     float phaseIncrement = 2.0f * M_PI / (SAMPLE_RATE / freq);
     float phase = 0.0f;
@@ -74,8 +72,7 @@ void square(int n, int f, struct Note* note, int pitch, float* buffer){
     }
 }
 
-void triangle(int n, int f, struct Note* note, int pitch, float* buffer) {
-    float freq = (note->freq) / pow(2, (4-pitch));
+void triangle(int n, int f, struct Note* note, float freq, float* buffer) {
     float period = 1.0f / freq;
     float phaseIncrement = 2 * M_PI * freq / SAMPLE_RATE;
     float phase = -1.0f;

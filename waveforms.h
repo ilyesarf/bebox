@@ -19,11 +19,11 @@ float lerp(float a, float b, float t);
 
 float adsr(float t, float attack, float decay, float sustain, float release); 
 
-void sine(int n, int f, struct Note* note, int pitch, float* buffer);
+void sine(int n, int f, struct Note* note, float freq, float* buffer);
 
-void sawtooth(int n, int f, struct Note* note, int pitch, float* buffer);
+void sawtooth(int n, int f, struct Note* note, float freq, float* buffer);
 
-void square(int n, int f, struct Note* note, int pitch, float* buffer);
+void square(int n, int f, struct Note* note, float freq, float* buffer);
 
-void triangle(int n, int f, struct Note* note, int pitch, float* buffer);
+void triangle(int n, int f, struct Note* note, float freq, float* buffer);
 #endif
