@@ -134,8 +134,8 @@ int main(int argc, char *argv[]) {
         
         mix(waveforms, n_waveforms, n, f, note, freq, buffer);
     }
-
-    write_wav(buffer, n*n_notes);
+    
+    write_wav("synth.wav", buffer, n*n_notes);
 
     return 0;
 }

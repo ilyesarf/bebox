@@ -34,7 +34,7 @@ char **split(char *str, char *delimiter, int *num_tokens) {
     return tokens;
 }
 
-void write_wav(float* buffer, int n){
+void write_wav(char* path, float* buffer, int n){
     SNDFILE *file;
     SF_INFO info;
 
@@ -42,7 +42,7 @@ void write_wav(float* buffer, int n){
     info.samplerate = SAMPLE_RATE;
     info.channels = 1;
     info.format = SF_FORMAT_WAV | SF_FORMAT_FLOAT;
-    file = sf_open("sine.wav", SFM_WRITE, &info);
+    file = sf_open(path, SFM_WRITE, &info);
     if (!file) {
         printf("Error opening output file\n");
         exit(1);
