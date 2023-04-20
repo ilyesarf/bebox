@@ -5,7 +5,7 @@
 #include "waveforms.h"
 
 #define MAXBUFLEN 1000
-#define DURATION 0.5f
+#define DURATION 1.0f
 
 int read_notes(char** fnotes){
     FILE *fp = fopen("notes.n", "r");
@@ -102,10 +102,15 @@ int main(int argc, char *argv[]) {
     float buffer[n*n_notes];
     for (int f=0; f < n_notes; f++){
         char* fnote = fnotes[f];
-        int sharp = 0;
+
+        int sharp = 0, flat = 0;
         for (int i=0; i < strlen(fnote); i++){
             if (fnote[i] == '#'){
                 sharp = 1;
+                fnote[i] = fnote[i+1];
+                fnote[i+1] = '\0';
+            } else if (fnote[i] == 'b'){
+                flat = 1;
                 fnote[i] = fnote[i+1];
                 fnote[i+1] = '\0';
             }
@@ -130,11 +135,11 @@ int main(int argc, char *argv[]) {
             exit(1);
         }
         struct Note* note = &notes[id]; 
-        float freq = ((note->freq) / pow(2, (4-pitch))) * pow(2, (sharp/12.0));
+        float freq = ((note->freq) / pow(2, (4-pitch))) * pow(2, (sharp/12.0)) / pow(2, flat/12.0);
         
         mix(waveforms, n_waveforms, n, f, note, freq, buffer);
     }
-    
+
     write_wav("synth.wav", buffer, n*n_notes);
 
     return 0;
