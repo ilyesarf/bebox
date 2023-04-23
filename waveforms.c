@@ -29,6 +29,9 @@ void sine(int n, int f, struct Note* note, float freq, float* buffer){
         amp = sinf(phase);
         buffer[i] += amp * adsr(period, note->attack, note->decay, note->sustain, note->release);
         phase += phaseIncrement;
+        while (phase > 2.0f * M_PI) {
+            phase -= 2.0f * M_PI;
+        }
     }
 }
 
@@ -43,6 +46,9 @@ void sawtooth(int n, int f, struct Note* note, float freq, float* buffer){
         amp = fmodf(phase, 1.0f);
         buffer[i] += amp * adsr(period, note->attack, note->decay, note->sustain, note->release);
         phase += phaseIncrement;
+        while (phase > 1.0f) {
+            phase -= 1.0f;
+        }
     }
 }
 
@@ -65,8 +71,10 @@ void square(int n, int f, struct Note* note, float freq, float* buffer){
         } else {
             buffer[i] += -1.0f * adsr(period, note->attack, note->decay, note->sustain, note->release);
         }
+
         phase += phaseIncrement;
-        if (phase >= 2.0f * M_PI) {
+
+        while (phase > 2.0f * M_PI) {
             phase -= 2.0f * M_PI;
         }
     }
@@ -74,25 +82,25 @@ void square(int n, int f, struct Note* note, float freq, float* buffer){
 
 void triangle(int n, int f, struct Note* note, float freq, float* buffer) {
     float period = 1.0f / freq;
-    float phaseIncrement = 2 * M_PI * freq / SAMPLE_RATE;
-    float phase = -1.0f;
-    float amp = 0.5f;
+    float phaseIncrement = 2 * freq / SAMPLE_RATE;
+    float phase = 0.0f;
+    float amp = 0.8f;
 
     for (int i = n*f; i < n*(f+1); i++) {
         float sample;
-        if (phase <= M_PI) {
-            sample = 2 * amp * (2 * phase / M_PI - 1);
+        if (phase <= 0.5) {
+            sample = 4 * amp * phase - amp;
         } else {
-            sample = 2 * amp * (3 - 2 * phase / M_PI) - 2;
+            sample = 3 * amp - 4 * amp * (phase - 0.5);
         }
 
         sample *= adsr(period, note->attack, note->decay, note->sustain, note->release);
         buffer[i] += sample;
 
         phase += phaseIncrement;
-
-        if (phase >= 2 * M_PI) {
-            phase -= 2 * M_PI;
+        
+        while (phase > 1.0) {
+            phase -= 1.0;
         }
     }
 }
