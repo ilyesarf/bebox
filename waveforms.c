@@ -18,14 +18,14 @@ float adsr(float t, float attack, float decay, float sustain, float release) {
     }
 }
 
-void sine(int n, int f, struct Note* note, float freq, float* buffer){
+void sine(int n, int buflen, int f, struct Note* note, float freq, float* buffer){
     float period = 1.0f / freq;
     float phaseIncrement = 2.0f * M_PI / (SAMPLE_RATE / freq);
     float phase = 0.0f;
     float amp = 0.0f;
 
     // Generate the sine wave
-    for (int i = n*f; i < n*(f+1); i++) {
+    for (int i=buflen; i < n; i++) {
         amp = sinf(phase);
         buffer[i] += amp * adsr(period, note->attack, note->decay, note->sustain, note->release);
         phase += phaseIncrement;
@@ -35,14 +35,14 @@ void sine(int n, int f, struct Note* note, float freq, float* buffer){
     }
 }
 
-void sawtooth(int n, int f, struct Note* note, float freq, float* buffer){
+void sawtooth(int n, int buflen, int f, struct Note* note, float freq, float* buffer){
     float period = 1.0f / freq;
     float phaseIncrement = 2.0f / (SAMPLE_RATE / freq);
     float phase = 0.0f;
     float amp = 0.0f;
 
     // generate sawtooth waveform
-    for (int i = n*f; i < n*(f+1); i++) {
+    for (int i=buflen; i < n; i++) {
         amp = fmodf(phase, 1.0f);
         buffer[i] += amp * adsr(period, note->attack, note->decay, note->sustain, note->release);
         phase += phaseIncrement;
@@ -52,7 +52,7 @@ void sawtooth(int n, int f, struct Note* note, float freq, float* buffer){
     }
 }
 
-void square(int n, int f, struct Note* note, float freq, float* buffer){
+void square(int n, int buflen, int f, struct Note* note, float freq, float* buffer){
     float period = 1.0f / freq;
     float phaseIncrement = 2.0f * M_PI / (SAMPLE_RATE / freq);
     float phase = 0.0f;
@@ -64,7 +64,7 @@ void square(int n, int f, struct Note* note, float freq, float* buffer){
     }
 
     // Generate the square wave
-    for (int i = n*f; i < n*(f+1); i++) {
+    for (int i=buflen; i < n; i++) {
         float value = sinf(phase);
         if (value > dutyCycle) {
             buffer[i] += 1.0f * adsr(period, note->attack, note->decay, note->sustain, note->release);
@@ -80,13 +80,13 @@ void square(int n, int f, struct Note* note, float freq, float* buffer){
     }
 }
 
-void triangle(int n, int f, struct Note* note, float freq, float* buffer) {
+void triangle(int n, int buflen, int f, struct Note* note, float freq, float* buffer) {
     float period = 1.0f / freq;
     float phaseIncrement = 2 * freq / SAMPLE_RATE;
     float phase = 0.0f;
     float amp = 0.8f;
 
-    for (int i = n*f; i < n*(f+1); i++) {
+    for (int i=buflen; i < n; i++) {
         float sample;
         if (phase <= 0.5) {
             sample = 4 * amp * phase - amp;

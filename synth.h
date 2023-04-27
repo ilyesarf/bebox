@@ -34,7 +34,7 @@ char **split(char *str, char *delimiter, int *num_tokens) {
     return tokens;
 }
 
-void write_wav(char* path, float* buffer, int n){
+void write_wav(char* path, float* buffer, int buflen){
     SNDFILE *file;
     SF_INFO info;
 
@@ -49,7 +49,7 @@ void write_wav(char* path, float* buffer, int n){
     }
 
     // Write the samples to the output file
-    sf_write_float(file, buffer, n);
+    sf_write_float(file, buffer, buflen);
 
     // Close the output file
     sf_close(file);
