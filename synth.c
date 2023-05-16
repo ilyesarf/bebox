@@ -16,12 +16,15 @@ int read_notes(char** fnotes){
         exit(1);
     }
 
-    int n_notes;
+    int n_notes = 0;
     char space[] = " ";
     while (fgets(line, sizeof(line), fp)) {
         char** tokens = split(line, space, &n_notes);
-        for (int i=0; i < n_notes; i++){
-            strcpy(&fnotes[i], &tokens[i]);
+        for (int i = 0; i < n_notes; i++){
+            fnotes[i] = (char*) malloc(strlen(tokens[i])+1);
+
+            strcpy(fnotes[i], tokens[i]);
+
         }
     }
 
@@ -29,6 +32,7 @@ int read_notes(char** fnotes){
 
     return n_notes;
 }
+
 
 int get_waveforms(void (*waveforms[])(int, int, int, struct Note *, float, float *), int argc, char *argv[]){
     int n_waveforms = 0;
@@ -59,7 +63,7 @@ int get_waveforms(void (*waveforms[])(int, int, int, struct Note *, float, float
     return n_waveforms;
 }
 
-void mix(void (*waveforms[])(int, int, int, struct Note *, float, float *), int n_waveforms, int* buflen, int f, struct Note* note, float freq, float* buffer){
+void mix(void (*waveforms[])(int, int, int, struct Note *, float, float *), int n_waveforms, int* buflen, int f, struct Note* note, float freq, float** buffer){
     float dur;
     if (note->duration > 0){
        dur = note->duration;
@@ -68,18 +72,12 @@ void mix(void (*waveforms[])(int, int, int, struct Note *, float, float *), int 
     }
 
     int n = ceil(SAMPLE_RATE * dur);
-    buffer = realloc(buffer, (*buflen + n) * sizeof(float));
-
-    //zero buffer
-    for (int i=*buflen; i < n; i++){
-        buffer[i] = 0;
-    }
-
+    *buffer = realloc(*buffer, (*buflen + n + 1) * sizeof(float*));
 
     if (note->name != '0'){
         for (int i=0; i < n_waveforms; i++){
             void (*waveform)(int, int, int, struct Note*, float, float*) = waveforms[i];
-            waveform(n, *buflen, f, note, freq, buffer);
+            waveform(n, *buflen, f, note, freq, *buffer);
         }
     }
 
@@ -109,14 +107,18 @@ int main(int argc, char *argv[]) {
 
     char* fnotes[MAXBUFLEN + 1];
     int n_notes = read_notes(fnotes);
-    printf("n_notes -> %d\n", n_notes);
     int buflen = 0;
 
-    float *buffer = malloc(buflen);
+    float *buffer = malloc(buflen * sizeof(float));
     for (int f=0; f < n_notes; f++){
         char* fnote = fnotes[f];
 
         int sharp = 0, flat = 0;
+        if (strlen(fnote) == 6){
+            printf("fnote is weird\n");
+            exit(1);
+        }
+
         for (int i=0; i < strlen(fnote); i++){
             if (fnote[i] == '#'){
                 sharp = 1;
@@ -146,19 +148,16 @@ int main(int argc, char *argv[]) {
         }
 
         if (id == -1){
-            printf("Note %c not found\n", *fnote);
+            printf("Note %s not found\n", fnote);
             exit(1);
         }
         struct Note* note = &notes[id]; 
         float freq = ((note->freq) / pow(2, (4-pitch))) * pow(2, (sharp/12.0)) / pow(2, flat/12.0);
 
-        mix(waveforms, n_waveforms, &buflen, f, note, freq, buffer);
-        printf("buflen -> %d\nNote -> %c\n", buflen, fnote[0]);
+        mix(waveforms, n_waveforms, &buflen, f, note, freq, &buffer);
     }
-    printf("buflen final -> %d\n", buflen);
-    //todo: buffer from dynamic into static allocated array
+    
     write_wav("synth.wav", buffer, buflen);
-
     return 0;
 }
 
